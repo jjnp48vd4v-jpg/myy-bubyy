@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Sayang! 🖤🌹</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=600;800&family=Montserrat:wght=400;600&family=Sacramento&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0;
+            background: #050505;
+            font-family: 'Montserrat', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-x: hidden; color: #ffffff;
+        }
+
+        /* --- SCREEN SCREEN PEMBUKA (COUNTDOWN & MATRIX TEXT) --- */
+        #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 999; display: flex;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        #matrix-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.35;
+        }
+        #countdown-text {
+            font-family: 'Cinzel', serif; font-size: 80px; font-weight: 800;
+            color: #ff003c; text-shadow: 0 0 20px #ff003c; z-index: 10;
+            transition: all 0.3s ease;
+        }
+        #text-sequence {
+            font-family: 'Cinzel', serif; font-size: 32px; font-weight: 800;
+            color: #ffffff; text-shadow: 0 0 15px #ff003c; z-index: 10;
+            text-align: center; letter-spacing: 4px; display: none;
+            max-width: 90%; line-height: 1.6;
+        }
+
+        /* --- UTAMA WRAPPER --- */
+        .wrapper {
+            width: 100%; max-width: 420px; padding: 20px;
+            text-align: center; position: relative; z-index: 10;
+            display: none; /* Muncul setelah intro selesai */
+        }
+        .card {
+            background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(12px);
+            border: 2px solid #ff003c; border-radius: 30px; padding: 35px 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 60, 0.25);
+            animation: floating 3.5s ease-in-out infinite alternate;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); } 100% { transform: translateY(-10px); }
+        }
+
+        /* --- DANDELION EFFECT --- */
+        .flower-container {
+            width: 100%; height: 130px; position: relative; margin-bottom: 5px;
+        }
+        .flower-text {
+            font-family: 'Cinzel', serif; font-size: 16px; font-weight: 800;
+            letter-spacing: 4px; color: #ffffff; text-shadow: 0 0 10px #ff003c;
+        }
+        .svg-flower { width: 100px; height: 100px; }
+        .stem, .dande-head {
+            stroke-dasharray: 500; stroke-dashoffset: 500;
+            animation: grow 3s ease forwards;
+        }
+        .dande-head { animation-delay: 0.5s; transform-origin: 50px 45px; }
+        .fluff { opacity: 0; animation: flyAway 4s linear infinite; }
+        .f1 { animation-delay: 1s; } .f2 { animation-delay: 2.5s; }
+        @keyframes grow { to { stroke-dashoffset: 0; } }
+        @keyframes flyAway {
+            0% { transform: translate(0, 0); opacity: 0; }
+            5% { opacity: 1; }
+            100% { transform: translate(-30px, -40px); opacity: 0; }
+        }
+
+        /* --- AMPLOP SURAT INTERAKTIF (3D FOLDING) --- */
+        .envelope-wrapper {
+            position: relative; width: 200px; height: 140px;
+            margin: 20px auto; cursor: pointer; perspective: 1000px;
+        }
+        .envelope {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a0206; border: 2px solid #ff003c; border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .envelope::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 100px solid transparent; border-right: 100px solid transparent;
+            border-bottom: 70px solid rgba(255, 0, 60, 0.15); z-index: 4;
+        }
+        .flap {
+            position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 100px solid transparent; border-right: 100px solid transparent;
+            border-top: 72px solid #ff003c; transform-origin: top;
+            transition: transform 0.5s ease z-index; z-index: 5;
+        }
+        .letter-preview {
+            position: absolute; bottom: 10px; left: 15px; width: 170px; height: 110px;
+            background: #ffffff; border-radius: 5px; z-index: 2;
+            transition: transform 0.5s ease; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .letter-preview img { width: 90%; height: 90%; object-fit: cover; border-radius: 3px; }
+        
+        /* State saat amplop terbuka */
+        .envelope-wrapper.open .flap { transform: rotateX(180deg); z-index: 1; }
+        .envelope-wrapper.open .letter-preview { transform: translateY(-60px) scale(1.1); z-index: 3; }
+
+        /* --- ISI SURAT BERGRADASI --- */
+        h1 { font-family: 'Cinzel', serif; font-size: 26px; text-shadow: 0 0 10px #ff003c; margin: 10px 0; }
+        .subtitle { font-size: 11px; color: #ff4d79; margin-bottom: 20px; letter-spacing: 2px; }
+        
+        .letter-box {
+            display: none; margin-top: 20px; padding: 20px;
+            background: rgba(20, 5, 8, 0.95); border-radius: 20px;
+            border-left: 5px solid #ff003c; text-align: left;
+            box-shadow: 0 0 15px rgba(255, 0, 60, 0.2);
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .letter-box p { font-size: 13px; line-height: 1.6; color: #e0e0e0; margin: 0 0 10px 0; }
+        .letter-box p b { color: #ff4d79; }
+        .signature { text-align: right; font-family: 'Sacramento', cursive; font-size: 30px; color: #ff003c; margin-top: 15px; }
+
+        /* --- REKAYASA KOLASE FOTO BENTUK HATI --- */
+        #heart-collage-container {
+            position: relative; width: 280px; height: 260px; margin: 30px auto 10px;
+            display: none;
+        }
+        .collage-photo {
+            position: absolute; width: 45px; height: 45px; object-fit: cover;
+            border: 1.5px solid #ff003c; border-radius: 8px; opacity: 0;
+            transform: scale(0); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 8px rgba(255, 0, 60, 0.4);
+        }
+        .collage-photo.show { opacity: 1; transform: scale(1); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .rose-particle { position: fixed; top: -10%; z-index: 1; pointer-events: none; animation: floatDown linear infinite; }
+        @keyframes floatDown { to { transform: translateY(110vh) rotate(360deg); } }
+        .footer { font-size: 9px; color: #555; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen">
+        <canvas id="matrix-canvas"></canvas>
+        <div id="countdown-text">3</div>
+        <div id="text-sequence"></div>
+    </div>
+
+    <div class="wrapper" id="main-content">
+        <div class="card">
+            
+            <div class="flower-container">
+                <div class="flower-text">I LOVE U</div>
+                <svg class="svg-flower" viewBox="0 0 100 100">
+                    <path class="stem" d="M50,95 Q51,70 50,45" fill="none" stroke="#556b2f" stroke-width="2" />
+                    <path class="fluff f1" d="M46,40 Q38,28 32,15" fill="none" stroke="#ffffff" stroke-width="0.6" />
+                    <path class="fluff f2" d="M48,35 Q35,22 40,5" fill="none" stroke="#ffffff" stroke-width="0.6" />
+                    <g class="dande-head">
+                        <circle cx="50" cy="45" r="2.5" fill="#443311" />
+                        <path d="M50,45 L50,25 M50,45 L50,65 M50,45 L30,45 M50,45 L70,45 M50,45 L36,31 M50,45 L64,59 M50,45 L36,59 M50,45 L64,31" stroke="#ffffff" stroke-width="0.8" opacity="0.8"/>
+                        <circle cx="50" cy="25" r="1.5" fill="#ffffff" /><circle cx="50" cy="65" r="1.5" fill="#ffffff" /><circle cx="30" cy="45" r="1.5" fill="#ffffff" /><circle cx="70" cy="45" r="1.5" fill="#ffffff" />
+                    </g>
+                </svg>
+            </div>
+
+            <div class="envelope-wrapper" id="envelope" onclick="openLetterOverlay()">
+                <div class="flap"></div>
+                <div class="envelope"></div>
+                <div class="letter-preview">
+                    <img src="foto-pacar.jpg" alt="Preview" onerror="this.src='https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=300'">
+                </div>
+            </div>
+
+            <h1 id="main-title">HAPPY BIRTHDAY</h1>
+            <div class="subtitle">Eksklusif Untukmu Hari Ini ✨</div>
+            
+            <div class="letter-box" id="letterContent">
+                <p><b>Selamat Ulang Tahun, Sayang... ❤️</b></p>
+                <p>Di hari yang sangat spesial ini, aku cuma ingin meluangkan waktu buat bilang betapa berartinya kehadiran kamu di dalam hidup aku.</p>
+                <p>Terima kasih sudah menjadi alasan di balik senyumku, menjadi sandaran terbaik, dan selalu sabar menemani setiap proses petualangan kita bersama selama ini.</p>
+                <p>Semoga di umurmu yang baru, kebahagiaan selalu menyelimuti langkahmu, kesehatan selalu menjagamu, dan semua impian besar yang kamu kejar bisa terwujud nyata satu per satu.</p>
+                <p><i>Happy birthday, my absolute favorite person. I love you more than words can say.</i> 🖤✨</p>
+                <div class="signature">Selamanya Milikmu, 🌹</div>
+            </div>
+
+            <div id="heart-collage-container"></div>
+
+            <div class="footer">Created Specially for Your Special Day</div>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIK TEXT MATRIX BACKGROUND ---
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789❤️🌹✨🖤";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff003c'; // Warna text jatuh disamakan pink/merah neon sesuai video
+            ctx.font = fontSize + 'px monospace';
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        }
+        const matrixInterval = setInterval(drawMatrix, 30);
+
+        // --- LOGIK COUNTDOWN KE TEKS BERURUTAN ---
+        const countdownElement = document.getElementById('countdown-text');
+        const textSeqElement = document.getElementById('text-sequence');
+        let count = 3;
+
+        const countdownInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownElement.innerText = count;
+            } else {
+                clearInterval(countdownInterval);
+                countdownElement.style.display = 'none';
+                startTextSequence();
+            }
+        }, 1000);
+
+        // Urutan kemunculan teks besar sesuai alur video lu
+        const phrases = ["HAPPY", "BIRTHDAY", "TO", "SAYANGKU ❤️"]; 
+        let phraseIndex = 0;
+
+        function startTextSequence() {
+            textSeqElement.style.display = 'block';
+            textSeqElement.innerText = phrases[phraseIndex];
+            
+            const seqInterval = setInterval(() => {
+                phraseIndex++;
+                if (phraseIndex < phrases.length) {
+                    textSeqElement.innerText = phrases[phraseIndex];
+                } else {
+                    clearInterval(seqInterval);
+                    clearInterval(matrixInterval);
+                    // Hilangkan Intro, Tampilkan Konten Utama
+                    document.getElementById('intro-screen').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    startRoseRain();
+                }
+            }, 1100);
+        }
+
+        // --- LOGIK BUKA SURAT DAN TIMBULKAN COLLAGE HATI ---
+        function openLetterOverlay() {
+            const env = document.getElementById('envelope');
+            const letter = document.getElementById('letterContent');
+            
+            if(!env.classList.contains('open')) {
+                env.classList.add('open');
+                setTimeout(() => {
+                    letter.style.display = 'block';
+                    generateHeartCollage();
+                }, 600);
+            }
+        }
+
+        // --- REKAYASA STRUKTUR POSISI KORDINAT BENTUK HATI ---
+        // Menggunakan link gambar unspash default, nanti otomatis nge-load foto estetik acak
+        const imgUrls = [
+            'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=150',
+            'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=150',
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=150'
+        ];
+
+        // Koordinat X, Y untuk membentuk pola hati yang presisi di area tengah
+        const heartPoints = [
+            {x: 140, y: 40},  {x: 100, y: 20},  {x: 60, y: 30},   {x: 35, y: 60},
+            {x: 30, y: 100},  {x: 45, y: 140}, {x: 75, y: 180},  {x: 110, y: 215},
+            {x: 140, y: 240}, {x: 170, y: 215}, {x: 205, y: 180}, {x: 235, y: 140},
+            {x: 250, y: 100}, {x: 245, y: 60},  {x: 220, y: 30},  {x: 180, y: 20}
+        ];
+
+        function generateHeartCollage() {
+            const container = document.getElementById('heart-collage-container');
+            container.style.display = 'block';
+            
+            heartPoints.forEach((point, index) => {
+                const img = document.createElement('img');
+                // Mengambil gambar dari list/mengulang acak
+                img.src = imgUrls[index % imgUrls.length];
+                img.classList.add('collage-photo');
+                // Atur koordinat posisi tengah dikurangi setengah lebar foto agar rapi
+                img.style.left = (point.x - 22) + 'px';
+                img.style.top = (point.y - 22) + 'px';
+                
+                container.appendChild(img);
+                
+                // Efek delay muncul satu per satu berputar searah jarum jam sesuai video
+                setTimeout(() => {
+                    img.classList.add('show');
+                }, index * 200); 
+            });
+        }
+
+        // --- HUJAN PARTIKEL ---
+        function startRoseRain() {
+            setInterval(() => {
+                const particles = ['🌹', '❤️', '✨', '🖤'];
+                const p = document.createElement('div');
+                p.classList.add('rose-particle');
+                p.innerHTML = particles[Math.floor(Math.random() * particles.length)];
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.animationDuration = Math.random() * 3 + 3 + 's';
+                p.style.opacity = Math.random() * 0.5 + 0.5;
+                p.style.fontSize = Math.random() * 10 + 14 + 'px';
+                document.body.appendChild(p);
+                setTimeout(() => { p.remove(); }, 6000);
+            }, 350);
+        }
+    </script>
+</body>
+</html>
